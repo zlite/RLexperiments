@@ -33,7 +33,7 @@ class Memory:
         return random.sample(self.buffer, batch_size)
 
 # Environment Initialization
-env = gym.make('CartPole-v0')
+env = gym.make('CartPole-v0', render_mode="human")
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
 max_episodes = 1000
