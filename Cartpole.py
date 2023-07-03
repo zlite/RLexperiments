@@ -100,7 +100,7 @@ env = gym.make('CartPole-v0')
 state, _ = env.reset()  # Extract numpy array from the tuple
 done = False
 while not done:
-    env.render(mode='human')
+    env.render()
     time.sleep(0.02)  # Slow down the rendering
     with torch.no_grad():  # Don't need to calculate gradients here
         state = torch.from_numpy(state).float().unsqueeze(0)
