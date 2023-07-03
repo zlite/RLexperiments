@@ -33,7 +33,7 @@ class Memory:
         return random.sample(self.buffer, batch_size)
 
 # Environment Initialization
-env = gym.make('CartPole-v0', render_mode="human")
+env = gym.make('CartPole-v0')
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
 max_episodes = 1000
@@ -96,10 +96,11 @@ print("Training completed.")
 import time
 
 # After the training loop
-env = gym.make('CartPole-v0')
+env = gym.make('CartPole-v0', render_mode="human")  # Recreate the environment with render mode
+start_time = time.time()  # note the start time
+end_time = start_time + 10  # we want to run for 10 seconds
 state, _ = env.reset()  # Extract numpy array from the tuple
-done = False
-while not done:
+while time.time() < end_time:  # run until the desired end time
     env.render()
     time.sleep(0.02)  # Slow down the rendering
     with torch.no_grad():  # Don't need to calculate gradients here
@@ -108,6 +109,9 @@ while not done:
     result = env.step(action)  # Get the return value of the step method
     state_tuple, _, done, _, _ = env.step(action)  # Extract tuple from the output
     state = state_tuple  # Extract numpy array from the tuple
+    if done:  # If the episode ends (pole falls down), reset the environment
+        state, _ = env.reset()  # Extract numpy array from the tuple
+
 env.close()
 
 
