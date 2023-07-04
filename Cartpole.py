@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
+import matplotlib.pyplot as plt  # Import matplotlib for plotting
 
 # Q-Network
 class DQN(nn.Module):
@@ -45,12 +46,15 @@ DQN = DQN(state_dim, action_dim)
 memory = Memory(10000)
 optimizer = optim.Adam(DQN.parameters())
 
+rewards = []  # List to store total rewards per episode
+
 # Training Loop
 for episode in range(max_episodes):
     state, _ = env.reset()
     state = torch.from_numpy(state).float().unsqueeze(0)
     done = False
     steps = 0
+    total_reward = 0  # Reset the total reward for the episode
     while not done:
         # epsilon-greedy action selection
         if random.random() < max(0.01, 0.08 - 0.01*(episode/200)): 
@@ -61,6 +65,8 @@ for episode in range(max_episodes):
         next_state, reward, _, done, _ = env.step(action)
         next_state = torch.from_numpy(next_state).float().unsqueeze(0)
         
+        total_reward += reward  # Add the reward to the total
+
         # store in memory
         memory.add((state, action, reward, next_state, done))
         
@@ -68,7 +74,8 @@ for episode in range(max_episodes):
         steps += 1
         
         if done:
-            print(f"Episode: {episode + 1}, Steps: {steps}")
+            print(f"Episode: {episode + 1}, Steps: {steps}, Reward: {total_reward}")
+            rewards.append(total_reward)  # Store the total reward for the episode
             break
     
     if len(memory.buffer) > batch_size:
@@ -91,6 +98,14 @@ for episode in range(max_episodes):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
+    # Every 100 episodes, plot the total rewards over the past 100 episodes
+    if episode % 100 == 0:
+        plt.plot(np.convolve(rewards, np.ones((100,))/100, mode='valid'))
+        plt.title('Reward over the last 100 episodes')
+        plt.xlabel('Episode')
+        plt.ylabel('Average Reward')
+        plt.show()
 
 print("Training completed.")
 import time
@@ -113,6 +128,3 @@ while time.time() < end_time:  # run until the desired end time
         state, _ = env.reset()  # Extract numpy array from the tuple
 
 env.close()
-
-
-
